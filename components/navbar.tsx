@@ -7,16 +7,16 @@ export default function Navbar() {
 	const [user, setUser] = useState(null);
 
 	const registerHandler = () => {
-		router.push('/account/register');
+		router.push('/auth/register');
 	};
 
 	const loginHandler = () => {
-		router.push('/account/login');
+		router.push('/auth/login');
 	};
 
 	const logoutHandler = () => {
 		localStorage.removeItem('user');
-		router.push('/account/login');
+		router.push('/auth/login');
 	};
 
 	return (
