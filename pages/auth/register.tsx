@@ -72,7 +72,7 @@ export default function Register() {
 			<footer className='mb-3'>
 				<a
 					className='text-black hover:opacity-70 text-sm float-right'
-					href='/auth/register'
+					href='/auth/login'
 				>
 					Already have an account?
 				</a>

@@ -5,17 +5,18 @@ import { useTokenStore } from '../store/token';
 
 export default function Navbar() {
 	const router = useRouter();
-	const [currentUser, setCurrentUser] = useState(undefined);
+	const [currentUser, setCurrentUser] = useState();
 	const { token } = useTokenStore() as any;
 
 	useEffect(() => {
+		if (!router.isReady) return;
 		const userId = localStorage.getItem('userId');
 		console.log('userID from localStorage:', userId);
 
 		if (userId) {
-			setCurrentUser(JSON.parse(userId!));
+			setCurrentUser(JSON.parse(userId) as any);
 		}
-	}, []);
+	}, [router.isReady, setCurrentUser]);
 
 	const logoutHandler = () => {
 		localStorage.removeItem('userId');
@@ -38,7 +39,7 @@ export default function Navbar() {
 				</li>
 				<li className='self-center'>
 					<Link
-						href='/posts'
+						href={`/posts/${currentUser}`}
 						className='nav-item nav-link text-black p-5 hover:opacity-60'
 					>
 						Posts

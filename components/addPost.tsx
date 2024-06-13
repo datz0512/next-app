@@ -14,6 +14,8 @@ export default function AddPostComponent(props: any) {
 						placeholder='enter title...'
 						type='text'
 						name='title'
+						value={props.title}
+						onChange={props.onChange}
 					/>
 				</div>
 
@@ -27,6 +29,8 @@ export default function AddPostComponent(props: any) {
 						name='content'
 						cols={10}
 						rows={5}
+						value={props.content}
+						onChange={props.onChange}
 					/>
 				</div>
 
