@@ -1,45 +1,27 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import AddPostComponent from '@/components/addPost';
 
 export default function AddPost() {
 	const router = useRouter();
-	const [title, setTitle] = useState('');
-	const [description, setDescription] = useState('');
 
-	const submitHandler = (e: any) => {
+	const submitHandler = async (e: any) => {
 		e.preventDefault();
-		const title = e.target[0].value;
-		const content = e.target[1].value;
-		console.log(title, content);
+		const title = e.target.title.value;
+		const content = e.target.content.value;
+
+		const res = await fetch(`http://127.0.0.1:3333/posts/create`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.getItem('token')}`,
+			},
+			body: JSON.stringify({ title, content }),
+		});
+		const user = await res.json();
+		console.log(user);
 		router.push('/posts');
 	};
 
-	return (
-		<div>
-			<p>Add a post</p>
-			<form onSubmit={submitHandler}>
-				<label htmlFor='title'>Title</label>
-				<input
-					type='text'
-					value={title}
-					id='title'
-					name='title'
-					onChange={e => setTitle(e.target.value)}
-					style={{ color: 'black' }}
-				/>
-
-				<label htmlFor='description'>Description:</label>
-				<textarea
-					value={description}
-					id='description'
-					name='description'
-					onChange={e => setDescription(e.target.value)}
-					style={{ color: 'black' }}
-					rows={4}
-					cols={50}
-				/>
-				<button type='submit'>Add Post</button>
-			</form>
-		</div>
-	);
+	return <AddPostComponent submit={submitHandler} header='Add a post' />;
 }
