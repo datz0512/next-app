@@ -1,26 +1,44 @@
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useRef, useState } from 'react';
 
 export default function Register() {
 	const router = useRouter();
+	const [email, setEmail] = useState('');
+
+	const inputRef = useRef(null);
 
 	const submitHandler = async (e: any) => {
 		e.preventDefault();
-		const email = e.target.email.value;
-		const password = e.target.password.value;
-		const confirmPassword = e.target.confirmPassword.value;
+
+		const email = e.target.email.value.trim();
+		const password = e.target.password.value.trim();
+		const confirmPassword = e.target.confirmPassword.value.trim();
+
+		if (!email || !password || !confirmPassword)
+			return alert('Please fill in all fields');
 
 		if (password !== confirmPassword) return alert('Passwords do not match');
 
-		const res = await fetch(`http://127.0.0.1:3333/auth/register`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ email, password }),
-		});
-		const user = await res.json();
-		console.log(user);
-		router.push('/auth/login');
+		try {
+			const res = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ email, password }),
+				}
+			);
+			const user = await res.json();
+
+			if (user.message) throw new Error(user.message);
+
+			router.push('/auth/login');
+		} catch (error) {
+			return alert(error);
+		}
 	};
 
 	return (
@@ -32,10 +50,13 @@ export default function Register() {
 						Email
 					</label>
 					<input
+							ref={inputRef}
 						className='w-full p-2 mb-6 text-black border-b-2 border-black outline-none focus:bg-gray-300'
 						placeholder='enter email...'
-						type='text'
+						type='email'
 						name='email'
+						value={email}
+						onChange={e => e.target.value}
 					/>
 				</div>
 
@@ -53,11 +74,11 @@ export default function Register() {
 
 				<div>
 					<label className='block mb-2 text-black' htmlFor='confirmPassword'>
-						Confirm password :
+						Confirm password
 					</label>
 					<input
 						className='w-full p-2 mb-6 text-black border-b-2 border-black outline-none focus:bg-gray-300'
-						placeholder='enter password...'
+						placeholder='enter password again...'
 						type='password'
 						name='confirmPassword'
 					/>
@@ -69,14 +90,15 @@ export default function Register() {
 					/>
 				</div>
 			</form>
-			<footer className='mb-3'>
-				<a
+
+			<div className='mb-3'>
+				<Link
 					className='text-black hover:opacity-70 text-sm float-right'
 					href='/auth/login'
 				>
 					Already have an account?
-				</a>
-			</footer>
+				</Link>
+			</div>
 		</div>
 	);
 }

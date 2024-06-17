@@ -1,64 +1,72 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import AddPost from '../../../components/addPost';
+import AddPost from '@/components/AddPost';
+import { useTokenStore } from '@/store/token';
 
 export default function EditPost() {
 	const router = useRouter();
-	const [userId, setUserId] = useState();
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
+	const { token, userId } = useTokenStore() as any;
+	const postId = router.query.id;
+
+	useEffect(() => {
+		if (!router.isReady) return;
+		if (!token) {
+			router.push('/auth/login');
+		}
+		const bearerToken = `Bearer ${token}`;
+
+		try {
+			const fetchData = async () => {
+				const res = await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/posts/${postId}`,
+					{
+						method: 'GET',
+						headers: {
+							Authorization: bearerToken,
+						},
+					}
+				);
+				const post = await res.json();
+				setTitle(post.title);
+				setContent(post.content);
+			};
+
+			fetchData();
+		} catch (error) {
+			console.log(error);
+		}
+	}, [router.isReady, setTitle, setContent, postId, router, token]);
 
 	const onSubmitHandler = async (e: any) => {
 		e.preventDefault();
 		const title = e.target.title.value;
 		const content = e.target.content.value;
 
-		const res = await fetch(
-			`http://localhost:3333/posts/edit/${router.query.id}`,
-			{
+		if (!title || !content) return alert('Please fill in all fields');
+
+		try {
+			const res = await fetch(`http://localhost:3333/posts/edit/${postId}`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${localStorage.getItem('token')}`,
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({ title, content }),
-			}
-		);
-		const user = await res.json();
-		console.log(user);
-		router.push(`/posts/${userId}`);
-	};
-
-	useEffect(() => {
-		if (!router.isReady) return;
-		const token = localStorage.getItem('token');
-		setUserId(localStorage.getItem('userId') as any);
-		if (!token) {
-			router.push('/auth/login');
-		}
-		const bearerToken = `Bearer ${token}`;
-
-		fetch(`http://127.0.0.1:3333/posts/view/${router.query.id}`, {
-			method: 'GET',
-			headers: {
-				Authorization: bearerToken,
-			},
-		})
-			.then(res => res.json())
-			.then(post => {
-				setTitle(post.title);
-				setContent(post.content);
-			})
-			.catch(err => {
-				console.error(err);
 			});
-	}, [router.isReady, setTitle, setContent]);
+			const user = await res.json();
+			console.log(user);
+			router.push(`/posts/user/${userId}`);
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	return (
 		<div>
-			<p>Edit post with id: {router.query.id}</p>
 			<AddPost
-				header={`Edit Post Id ${router.query.id}`}
+				header={`Edit Post Id ${postId}`}
 				submit={onSubmitHandler}
 				title={title}
 				content={content}

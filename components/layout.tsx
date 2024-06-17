@@ -1,5 +1,5 @@
-import Navbar from './navbar';
-import Footer from './footer';
+import Navbar from './Navbar';
+import Footer from './Footer';
 import { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {

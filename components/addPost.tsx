@@ -1,4 +1,4 @@
-export default function AddPostComponent(props: any) {
+export default function AddPost(props: any) {
 	return (
 		<div className='w-full max-w-xs m-auto rounded p-5 mt-40 bg-stone-400'>
 			<h1 className='text-2xl font-bold text-center text-black'>
@@ -35,10 +35,12 @@ export default function AddPostComponent(props: any) {
 				</div>
 
 				<div>
-					<input
+					<button
 						className='w-full bg-black hover:opacity-70 text-white font-bold py-2 px-4 mb-6 rounded cursor-pointer'
 						type='submit'
-					/>
+					>
+						Submit
+					</button>
 				</div>
 			</form>
 		</div>

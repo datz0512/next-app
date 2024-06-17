@@ -1,17 +1,20 @@
 import { useRouter } from 'next/router';
 import { useTokenStore } from '../../store/token';
+import Link from 'next/link';
 
 export default function Login() {
 	const router = useRouter();
-	const { setToken } = useTokenStore() as any;
+	const { setToken, setUserId } = useTokenStore() as any;
 
 	const submitHandler = async (event: any) => {
 		event.preventDefault();
-		const email = event.target.email.value;
-		const password = event.target.password.value;
+		const email = event.target.email.value.trim();
+		const password = event.target.password.value.trim();
+
+		if (!email || !password) return alert('Please fill in all fields');
 
 		try {
-			const res = await fetch(`http://127.0.0.1:3333/auth/login`, {
+			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -19,12 +22,14 @@ export default function Login() {
 				body: JSON.stringify({ email, password }),
 			});
 			const response = await res.json();
-			console.log(response);
+
 			if (response.message) return alert(response.message);
+
 			if (response.token && response.user) {
 				localStorage.setItem('token', response.token);
-				localStorage.setItem('userId', JSON.stringify(response.user.id));
-				setToken(response.user.id);
+				localStorage.setItem('userId', response.user.id);
+				setToken(response.token);
+				setUserId(response.user.id);
 				router.push('/');
 			}
 		} catch (error) {
@@ -43,10 +48,11 @@ export default function Login() {
 					<input
 						className='w-full p-2 mb-6 text-black border-b-2 border-black outline-none focus:bg-gray-300'
 						placeholder='enter email...'
-						type='text'
+						type='email'
 						name='email'
 					/>
 				</div>
+
 				<div>
 					<label className='block mb-2 text-black' htmlFor='password'>
 						Password
@@ -58,21 +64,25 @@ export default function Login() {
 						name='password'
 					/>
 				</div>
+
 				<div>
-					<input
+					<button
 						className='w-full bg-black hover:opacity-70 text-white font-bold py-2 px-4 mb-6 rounded cursor-pointer'
 						type='submit'
-					/>
+					>
+						Submit
+					</button>
 				</div>
 			</form>
-			<footer className='mb-3'>
-				<a
+
+			<div className='mb-3'>
+				<Link
 					className='text-black hover:opacity-70 text-sm float-right'
 					href='/auth/register'
 				>
 					Create account
-				</a>
-			</footer>
+				</Link>
+			</div>
 		</div>
 	);
 }

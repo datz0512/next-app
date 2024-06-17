@@ -1,27 +1,28 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import { useTokenStore } from '../store/token';
+import { useEffect } from 'react';
 
 export default function Navbar() {
 	const router = useRouter();
-	const [currentUser, setCurrentUser] = useState();
-	const { token } = useTokenStore() as any;
+	const { token, userId, setToken, setUserId, removeToken, removeUserId } =
+		useTokenStore() as any;
 
 	useEffect(() => {
-		if (!router.isReady) return;
-		const userId = localStorage.getItem('userId');
-		console.log('userID from localStorage:', userId);
+		const localToken = localStorage.getItem('token');
+		const localUserId = localStorage.getItem('userId');
 
-		if (userId) {
-			setCurrentUser(JSON.parse(userId) as any);
+		if (localToken && localUserId) {
+			setToken(localToken);
+			setUserId(localUserId);
 		}
-	}, [router.isReady, setCurrentUser]);
+	}, [setToken, setUserId]);
 
 	const logoutHandler = () => {
-		localStorage.removeItem('userId');
 		localStorage.removeItem('token');
-		setCurrentUser(undefined);
+		localStorage.removeItem('userId');
+		removeToken();
+		removeUserId();
 
 		router.push('/auth/login');
 	};
@@ -39,16 +40,16 @@ export default function Navbar() {
 				</li>
 				<li className='self-center'>
 					<Link
-						href={`/posts/${currentUser}`}
+						href={`/posts/user/${userId}`}
 						className='nav-item nav-link text-black p-5 hover:opacity-60'
 					>
-						Posts
+						My posts
 					</Link>
 				</li>
 			</ul>
 
 			<ul className='navbar-nav h-15 flex w-full justify-end'>
-				{token || currentUser ? (
+				{token ? (
 					<li className='self-center'>
 						<button
 							onClick={logoutHandler}
